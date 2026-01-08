@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="tracking-container" style="text-align: center; padding: 4rem;">
+    <div style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;">✓</div>
+    <h1 class="section-title">{% trans "Thank you for your order!" %}</h1>
+    <p>{% trans "Your order has been placed successfully." %}</p>
+    <p style="margin: 1rem 0;"><strong>{% trans "Order ID:" %} {{ order.tracking_id }}</strong></p>
+
+    <div style="margin-top: 3rem; background: #fdfdfd; padding: 2rem; border: 1px dashed #ccc; display: inline-block;">
+        <h3>{% trans "Invoice Details" %}</h3>
+        <p><strong>{% trans "Billed to:" %}</strong> {{ order.full_name }}</p>
+        <p><strong>{% trans "Total Amount:" %}</strong> ${{ order.get_total_price }}</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+            {% trans "An email has been sent to" %} {{ order.email }} {% trans "with the invoice." %}
+        </p>
+        <button class="btn" style="margin-top: 1rem;" onclick="window.print()">{% trans "Print Invoice" %}</button>
+    </div>
+</div>
+{% endblock %}

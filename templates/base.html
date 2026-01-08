@@ -1,0 +1,78 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pilot - Baby Store{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'images/pilot_logo.png' %}" alt="Pilot" style="height: 40px; width: auto;">
+            </a>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="{% url 'shop' %}">{% trans "Shop" %}</a></li>
+                <li><a href="#">{% trans "Info" %}</a></li>
+                <li><a href="#">{% trans "Blog" %}</a></li>
+                <li class="track-link"><a href="{% url 'track_order' %}">{% trans "Track Order" %}</a></li>
+                {% if user.is_superuser %}
+                <li><a href="{% url 'admin_dashboard' %}" style="color: var(--primary-color); font-weight: bold;">{% trans "Dashboard" %}</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="header-actions">
+            <!-- Order Tracking Search Small or Lang Switcher -->
+            <form action="{% url 'search' %}" method="get" class="search-bar"
+                style="display:flex; gap:0.5rem; align-items:center; margin-right:1rem;">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="{% trans 'Search products' %}"
+                    class="form-input"
+                    style="padding:0.4rem 0.6rem; border:1px solid #ddd; border-radius:4px; min-width:220px;">
+                <button type="submit" class="btn" style="padding:0.45rem 0.8rem;">{% trans "Search" %}</button>
+            </form>
+            <!-- Language Switcher Removed -->
+            <a href="{% url 'cart_detail' %}" class="cart-icon">🛒 <span class="badge">{{ cart|length }}</span></a>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-col">
+            <h4>{% trans "Pilot" %}</h4>
+            <div class="socials">
+                <span>IG</span> <span>FB</span>
+            </div>
+        </div>
+        <div class="footer-col">
+            <h4>{% trans "Shop" %}</h4>
+            <ul>
+                <li><a href="#">{% trans "Bodies" %}</a></li>
+                <li><a href="#">{% trans "Tops" %}</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>{% trans "Contacts" %}</h4>
+            <p>269rgr Jarlplan st, Boston, USA</p>
+            <p>info@miniyou.com</p>
+        </div>
+    </footer>
+</body>
+
+</html>

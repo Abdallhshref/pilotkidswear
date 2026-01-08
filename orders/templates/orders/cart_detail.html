@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="tracking-container" style="max-width: 800px;">
+    <h1 class="section-title">{% trans "Your Shopping Bag" %}</h1>
+
+    {% if cart|length > 0 %}
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+        <thead>
+            <tr style="border-bottom: 2px solid #eee; text-align: left;">
+                <th style="padding: 1rem;">{% trans "Product" %}</th>
+                <th style="padding: 1rem;">{% trans "Quantity" %}</th>
+                <th style="padding: 1rem;">{% trans "Total" %}</th>
+                <th style="padding: 1rem;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart %}
+            <tr style="border-bottom: 1px solid #f9f9f9;">
+                <td style="padding: 1rem;">
+                    <strong>{{ item.variant.product.name }}</strong><br>
+                    <span style="font-size: 0.8rem; color: #666;">
+                        {{ item.variant.color.name }} / {{ item.variant.size.name }}
+                    </span>
+                </td>
+                <td style="padding: 1rem;">{{ item.quantity }}</td>
+                <td style="padding: 1rem;">LE {{ item.total_price }}</td>
+                <td style="padding: 1rem;">
+                    <a href="{% url 'cart_remove' item.variant.id %}" style="color: #d4a3a3;">✕</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="text-align: right; margin-bottom: 2rem;">
+        <h3>{% trans "Total:" %} LE {{ cart.get_total_price }}</h3>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <a href="{% url 'home' %}" class="btn">{% trans "Continue Shopping" %}</a>
+        <a href="{% url 'checkout' %}" class="btn" style="background: var(--text-color); color: #fff;">{% trans "Checkout" %}</a>
+    </div>
+    {% else %}
+    <p style="text-align: center;">{% trans "Your bag is empty." %}</p>
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'home' %}" class="btn">{% trans "Start Shopping" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

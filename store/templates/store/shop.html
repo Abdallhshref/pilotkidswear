@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<section id="shop-products" style="padding: 2rem;">
+    <div class="shop-container" style="display: flex; gap: 2rem;">
+        <!-- Filter Sidebar -->
+        <aside class="filters" style="width: 250px; min-width: 200px;">
+            <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">{% trans "Categories" %}</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 0.5rem;">
+                    <a href="{% url 'shop' %}"
+                        style="color: {% if not current_category %}var(--primary-color){% else %}#333{% endif %}; font-weight: {% if not current_category %}bold{% else %}normal{% endif %}; text-decoration: none;">
+                        {% trans "All Products" %}
+                    </a>
+                </li>
+                {% for cat in categories %}
+                <li style="margin-bottom: 0.5rem;">
+                    <a href="{% url 'shop' %}?category={{ cat.slug }}"
+                        style="color: {% if current_category.slug == cat.slug %}var(--primary-color){% else %}#333{% endif %}; font-weight: {% if current_category.slug == cat.slug %}bold{% else %}normal{% endif %}; text-decoration: none;">
+                        {{ cat.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <div class="products-area" style="flex-grow: 1;">
+            <h2 class="section-title">
+                {% if query %}
+                {% trans "Search Results for" %} "{{ query }}"
+                {% elif current_category %}
+                {{ current_category.name }}
+                {% else %}
+                {% trans "All Products" %}
+                {% endif %}
+            </h2>
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card">
+                    <a href="{% url 'product_detail' product.slug %}">
+                        <div class="product-image">
+                            {% if product.main_image %}
+                            <img src="{{ product.main_image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                            <div style="width: 100%; height: 100%; background: #eee;"></div>
+                            {% endif %}
+                        </div>
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-price">{{ product.base_price }} LE</p>
+                    </a>
+                </div>
+                {% empty %}
+                <p style="text-align: center; width: 100%;">{% trans "No products available yet." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+</section>
+{% endblock %}

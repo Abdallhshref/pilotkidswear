@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="tracking-container"
+    style="max-width: 900px; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin: 2rem auto; padding: 0 1rem;">
+    <div>
+        <h2 class="section-title">{% trans "Shipping Info" %}</h2>
+        <form method="post" id="checkout-form">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.95rem;">{{
+                    field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div style="background: #f0f4f8; padding: 1rem; border-radius: 8px; margin-top: 1.5rem;">
+                <p style="font-size: 0.9rem; color: #546e7a; margin-bottom: 0.5rem;">
+                    <i class="fas fa-truck-moving"></i> {% trans "Payment Method" %}: <strong>{% trans "Cash on Delivery
+                        (Only)" %}</strong>
+                </p>
+                <p style="font-size: 0.8rem; color: #78909c;">
+                    {% trans "Note: Shipping is 50 LE for Cairo/Giza, 75 LE for other regions." %}
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" name="place_order" class="btn"
+                    style="width: 100%; background: #2c3e50; color: #fff; padding: 0.8rem; font-weight: 600; border-radius: 4px; border: none; cursor: pointer;">
+                    {% trans "Place Order" %}
+                </button>
+            </div>
+        </form>
+
+        <script>
+            // Auto-update totals when city or coupon changes
+            const form = document.getElementById('checkout-form');
+            const citySelect = document.querySelector('select[name="city"]');
+            const couponInput = document.querySelector('input[name="coupon_code"]');
+
+            if (citySelect) {
+                citySelect.addEventListener('change', () => {
+                    form.submit();
+                });
+            }
+
+            if (couponInput) {
+                couponInput.addEventListener('blur', () => {
+                    if (couponInput.value) form.submit();
+                });
+            }
+        </script>
+    </div>
+
+    <div
+        style="background: #fff; padding: 2rem; border-radius: 12px; height: fit-content; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #eee;">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem;">{% trans "Order
+            Summary" %}</h3>
+        <ul style="margin-bottom: 1.5rem; list-style: none; padding: 0;">
+            {% for item in cart %}
+            <li style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem;">
+                <span style="color: #555;">{{ item.quantity }}x {{ item.variant.product.name }}</span>
+                <span style="font-weight: 500;">{{ item.total_price }} LE</span>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div style="border-top: 1px solid #eee; padding-top: 1rem; margin-top: 1rem;">
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: #666;">
+                <span>{% trans "Subtotal" %}</span>
+                <span>{{ cart.get_total_price }} LE</span>
+            </div>
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: #666;">
+                <span>{% trans "Shipping" %}</span>
+                <span>{% if shipping_price > 0 %}{{ shipping_price }}{% else %}--{% endif %} LE</span>
+            </div>
+            {% if discount_amount > 0 %}
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: #27ae60;">
+                <span>{% trans "Discount (SAVE10)" %}</span>
+                <span>-{{ discount_amount }} LE</span>
+            </div>
+            {% endif %}
+            <div
+                style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; margin-top: 1rem; color: #2c3e50;">
+                <span>{% trans "Total" %}</span>
+                <span>{{ total_price }} LE</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="tracking-container" style="max-width: 900px; margin: 0 auto; padding: 2rem;">
+    <h1 class="section-title">{% trans "Track Your Order" %}</h1>
+
+    <form method="get" action="." style="margin-bottom: 3rem; display: flex; gap: 1rem;">
+        {{ form.non_field_errors }}
+        <div class="form-group" style="flex-grow: 1;">
+            {{ form.tracking_id.errors }}
+            {{ form.tracking_id }}
+        </div>
+        <button type="submit" class="btn" style="height: fit-content; align-self: center;">{% trans "Track" %}</button>
+    </form>
+
+    {% if order %}
+    <!-- Status Timeline -->
+    <div class="status-timeline" style="margin-bottom: 3rem; background: #f9f9f9; padding: 2rem; border-radius: 8px;">
+        <h3 style="margin-bottom: 1.5rem; text-align: center;">{% trans "Order Status" %}</h3>
+        <div style="display: flex; justify-content: space-between; position: relative; padding: 0 10%;">
+            <!-- Status Line -->
+            <div
+                style="position: absolute; top: 15px; left: 10%; right: 10%; height: 2px; background: #ddd; z-index: 1;">
+            </div>
+
+            <!-- Steps -->
+            {% with status=order.status %}
+            <div style="z-index: 2; text-align: center; width: 80px;">
+                <div
+                    style="width: 30px; height: 30px; border-radius: 50%; background: {% if status == 'pending' or status == 'confirmed' or status == 'shipped' or status == 'delivered' %}var(--primary-color){% else %}#ddd{% endif %}; margin: 0 auto; color: white; display: flex; align-items: center; justify-content: center;">
+                    1</div>
+                <div style="font-size: 0.8rem; margin-top: 5px;">{% trans "Pending" %}</div>
+            </div>
+            <div style="z-index: 2; text-align: center; width: 80px;">
+                <div
+                    style="width: 30px; height: 30px; border-radius: 50%; background: {% if status == 'confirmed' or status == 'shipped' or status == 'delivered' %}var(--primary-color){% else %}#ddd{% endif %}; margin: 0 auto; color: white; display: flex; align-items: center; justify-content: center;">
+                    2</div>
+                <div style="font-size: 0.8rem; margin-top: 5px;">{% trans "Confirmed" %}</div>
+            </div>
+            <div style="z-index: 2; text-align: center; width: 80px;">
+                <div
+                    style="width: 30px; height: 30px; border-radius: 50%; background: {% if status == 'shipped' or status == 'delivered' %}var(--primary-color){% else %}#ddd{% endif %}; margin: 0 auto; color: white; display: flex; align-items: center; justify-content: center;">
+                    3</div>
+                <div style="font-size: 0.8rem; margin-top: 5px;">{% trans "Shipped" %}</div>
+            </div>
+            <div style="z-index: 2; text-align: center; width: 80px;">
+                <div
+                    style="width: 30px; height: 30px; border-radius: 50%; background: {% if status == 'delivered' %}var(--primary-color){% else %}#ddd{% endif %}; margin: 0 auto; color: white; display: flex; align-items: center; justify-content: center;">
+                    4</div>
+                <div style="font-size: 0.8rem; margin-top: 5px;">{% trans "Delivered" %}</div>
+            </div>
+            {% endwith %}
+        </div>
+        {% if order.status == 'cancelled' %}
+        <div style="text-align: center; margin-top: 2rem; color: #e74c3c; font-weight: bold;">
+            {% trans "This order has been cancelled." %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <!-- Items -->
+        <div>
+            <h3>{% trans "Order Items" %}</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead style="background: #f1f1f1;">
+                    <tr>
+                        <th style="padding: 10px; text-align: left;">{% trans "Product" %}</th>
+                        <th style="padding: 10px; text-align: center;">{% trans "Qty" %}</th>
+                        <th style="padding: 10px; text-align: right;">{% trans "Price" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 10px;">
+                            <strong>{{ item.variant.product.name }}</strong><br>
+                            <span style="font-size: 0.85rem; color: #666;">{{ item.variant.color.name }} / {{
+                                item.variant.size.name }}</span>
+                        </td>
+                        <td style="padding: 10px; text-align: center;">{{ item.quantity }}</td>
+                        <td style="padding: 10px; text-align: right;">LE {{ item.price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Order Summary -->
+        <div style="background: #fdfdfd; padding: 1.5rem; border: 1px solid #eee; height: fit-content;">
+            <h3>{% trans "Summary" %}</h3>
+            <p style="margin-top: 1rem; display: flex; justify-content: space-between;">
+                <span>{% trans "Order ID:" %}</span>
+                <strong style="font-size: 0.9rem;">{{ order.tracking_id }}</strong>
+            </p>
+            <p style="margin-top: 0.5rem; display: flex; justify-content: space-between;">
+                <span>{% trans "Total:" %}</span>
+                <strong>LE {{ order.get_total_price }}</strong>
+            </p>
+            <p style="margin-top: 0.5rem; display: flex; justify-content: space-between;">
+                <span>{% trans "Status:" %}</span>
+                <span class="badge"
+                    style="background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">{{
+                    order.get_status_display }}</span>
+            </p>
+
+            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #eee;">
+
+            <h4>{% trans "Shipping Address" %}</h4>
+            <p style="font-size: 0.9rem; color: #555; line-height: 1.6;">
+                {{ order.full_name }}<br>
+                {{ order.address }}<br>
+                {{ order.city }}<br>
+                {{ order.phone_number }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

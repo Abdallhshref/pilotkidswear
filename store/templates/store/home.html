@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">{% trans "Unisex organic clothes for miniature you" %}</h1>
+        <a href="#new-arrivals" class="btn">{% trans "See all items" %}</a>
+    </div>
+    <div class="hero-image">
+        <!-- Placeholder for hero image -->
+        <div style="width: 300px; height: 300px; background: #ddd; border-radius: 50%;"></div>
+    </div>
+</section>
+
+<section id="new-arrivals">
+    <h2 class="section-title">{% trans "New Arrivals" %}</h2>
+    <div class="products-grid">
+        {% for product in new_arrivals %}
+        <div class="product-card">
+            <a href="{% url 'product_detail' product.slug %}">
+                <div class="product-image">
+                    {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                    <div style="width: 100%; height: 100%; background: #eee;"></div>
+                    {% endif %}
+                </div>
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-price">${{ product.base_price }}</p>
+            </a>
+        </div>
+        {% empty %}
+        <p style="text-align: center; width: 100%;">{% trans "No products available yet." %}</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

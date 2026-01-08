@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="product-detail-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; padding: 4rem;">
+    <div class="detail-gallery" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="main-image"
+            style="background: #f9f9f9; aspect-ratio: 1/1; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 8px;">
+            {% if product.main_image %}
+            <img src="{{ product.main_image.url }}" alt="{{ product.name }}"
+                style="width: 100%; height: 100%; object-fit: cover;" id="mainImage">
+            {% else %}
+            <div style="width: 100%; height: 100%; background: #ddd;"></div>
+            {% endif %}
+        </div>
+
+        <div class="thumbnails" style="display: flex; gap: 1rem; overflow-x: auto;">
+            {% if product.main_image %}
+            <img src="{{ product.main_image.url }}" onclick="changeImage(this.src)"
+                style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 1px solid #ddd;">
+            {% endif %}
+            {% for img in product.images.all %}
+            <img src="{{ img.image.url }}" onclick="changeImage(this.src)"
+                style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 1px solid #ddd;">
+            {% endfor %}
+        </div>
+
+        <script>
+            function changeImage(src) {
+                document.getElementById('mainImage').src = src;
+            }
+        </script>
+    </div>
+
+    <div class="detail-info">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; font-weight: 300;">{{ product.name }}</h1>
+        <p class="price" style="font-size: 1.5rem; margin-bottom: 2rem;">${{ product.base_price }}</p>
+
+        <div class="description" style="margin-bottom: 2rem; color: #666;">
+            {{ product.description|linebreaks }}
+        </div>
+
+        <form id="addToCartForm" method="POST">
+            {% csrf_token %}
+
+            <div class="variants-section">
+                <!-- Data for JS -->
+                <script id="variant-data" type="application/json">
+                    {{ variant_data_json|safe }}
+                </script>
+                <script id="color-images-data" type="application/json">
+                    {{ color_images_json|safe }}
+                </script>
+                <script id="default-image" type="text/plain">{{ default_image }}</script>
+
+                <!-- Colors -->
+                <div class="color-selection" style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">{% trans "Color" %}</h3>
+                    <div class="color-options" style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                        {% for color in colors %}
+                        <label class="color-option"
+                            style="cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="color_select" value="{{ color.id }}" style="display: none;"
+                                onchange="handleColorChange(this)">
+                            <!-- Gradient: if comma exists, use both colors; otherwise gradient to white -->
+                            <div class="color-swatch-gradient"
+                                style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #ddd; background: {% if ',' in color.hex_code %}linear-gradient(180deg, {{ color.hex_code|slice:':7' }} 0%, {{ color.hex_code|slice:'8:' }} 100%){% else %}linear-gradient(135deg, {{ color.hex_code }} 0%, #ffffff 150%){% endif %}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s, border 0.2s;"
+                                title="{{ color.name }}">
+                            </div>
+                            <span class="color-name"
+                                style="font-size: 0.75rem; font-weight: 700; color: #333; text-align: center; max-width: 70px; line-height: 1.2; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">{{
+                                color.name }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Sizes -->
+                <div class="size-selection" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">{% trans "Size" %}</h3>
+                    <div class="size-options" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        {% for size in sizes %}
+                        <button type="button" class="size-btn" data-size-id="{{ size.id }}"
+                            onclick="handleSizeSelect(this)" disabled
+                            style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; transition: all 0.2s; min-width: 50px;">
+                            {{ size.name }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <input type="hidden" name="variant" id="selectedVariantId">
+
+                <div id="stock-message" style="margin-bottom: 1rem; height: 1.2em; font-weight: bold;"></div>
+            </div>
+
+            <!-- Quantity Selector -->
+            <div class="quantity-section" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+                <h3 style="margin: 0; font-size: 1.1rem;">{% trans "Quantity" %}</h3>
+                <div class="quantity-input-wrapper"
+                    style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: #fff;">
+                    <button type="button" onclick="changeQty(-1)"
+                        style="border: none; background: none; padding: 0.5rem 1rem; cursor: pointer; font-size: 1.2rem; transition: background 0.2s;">-</button>
+                    <input type="number" name="quantity" id="quantityInput" value="1" min="1" readonly
+                        style="width: 50px; text-align: center; border: none; border-left: 1px solid #ddd; border-right: 1px solid #ddd; padding: 0.5rem 0; font-size: 1rem; -moz-appearance: textfield; pointer-events: none;">
+                    <button type="button" onclick="changeQty(1)"
+                        style="border: none; background: none; padding: 0.5rem 1rem; cursor: pointer; font-size: 1.2rem; transition: background 0.2s;">+</button>
+                </div>
+            </div>
+
+            <button type="button" class="btn" onclick="submitToCart()" id="addToCartBtn" disabled
+                style="width: 100%; background: #ccc; color: #fff; text-align: center; border:none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; cursor: not-allowed;">
+                {% trans "Add to bag" %}
+            </button>
+        </form>
+
+        <style>
+            .color-option input:checked+.color-swatch-gradient {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 3px #fff, 0 0 0 6px #333;
+                border-color: #333 !important;
+            }
+
+            .color-option input:checked~.color-name {
+                font-weight: 900;
+                color: #000;
+            }
+
+            .size-btn.active {
+                background: #333 !important;
+                color: #fff !important;
+                border-color: #333 !important;
+            }
+
+            .size-btn:disabled,
+            .size-btn.disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+                background: #f5f5f5 !important;
+                color: #aaa !important;
+                /* "off light" effect */
+                border-color: #eee !important;
+            }
+
+            .size-btn:not(:disabled):hover {
+                border-color: #333;
+            }
+        </style>
+
+        <script>
+            const variantData = JSON.parse(document.getElementById('variant-data').textContent);
+            const colorImages = JSON.parse(document.getElementById('color-images-data').textContent);
+            const defaultImage = document.getElementById('default-image').textContent;
+            let selectedColorId = null;
+            let selectedSizeId = null;
+
+            function changeQty(delta) {
+                const input = document.getElementById('quantityInput');
+                let val = parseInt(input.value) + delta;
+                if (val < 1) val = 1;
+                input.value = val;
+            }
+
+            function handleColorChange(input) {
+                selectedColorId = parseInt(input.value);
+                selectedSizeId = null; // Reset size on new color
+                document.getElementById('selectedVariantId').value = '';
+
+                // Update main image based on color
+                updateMainImage(selectedColorId);
+
+                // Reset UI
+                updateSizeAvailability();
+                updateCartButton();
+                document.getElementById('stock-message').textContent = '';
+            }
+
+            function updateMainImage(colorId) {
+                const mainImg = document.getElementById('mainImage');
+                if (mainImg) {
+                    if (colorImages[colorId]) {
+                        mainImg.src = colorImages[colorId];
+                    } else {
+                        mainImg.src = defaultImage;
+                    }
+                }
+            }
+
+            function updateSizeAvailability() {
+                const sizeBtns = document.querySelectorAll('.size-btn');
+                const availableSizes = variantData[selectedColorId] || {};
+
+                sizeBtns.forEach(btn => {
+                    const sId = parseInt(btn.getAttribute('data-size-id'));
+                    btn.classList.remove('active'); // Reset selection
+
+                    if (availableSizes[sId] && availableSizes[sId].in_stock) {
+                        btn.disabled = false;
+                        btn.classList.remove('disabled');
+                    } else {
+                        btn.disabled = true;
+                        btn.classList.add('disabled'); // Ensure "off light" style
+                    }
+                });
+            }
+
+            function handleSizeSelect(btn) {
+                if (btn.disabled) return;
+
+                // UI Selection
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                selectedSizeId = parseInt(btn.getAttribute('data-size-id'));
+
+                // Find Variant ID
+                if (selectedColorId && selectedSizeId) {
+                    const variant = variantData[selectedColorId][selectedSizeId];
+                    if (variant) {
+                        document.getElementById('selectedVariantId').value = variant.variant_id;
+                        document.getElementById('stock-message').textContent = "";
+                        updateCartButton();
+                    }
+                }
+            }
+
+            function updateCartButton() {
+                const btn = document.getElementById('addToCartBtn');
+                if (selectedColorId && selectedSizeId) {
+                    btn.disabled = false; // Add to bag available
+                    btn.classList.remove('disabled');
+                    btn.style.background = 'var(--text-color)';
+                    btn.style.cursor = 'pointer';
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add('disabled');
+                    btn.style.background = '#ccc';
+                    btn.style.cursor = 'not-allowed';
+                }
+            }
+
+            function submitToCart() {
+                const variantId = document.getElementById('selectedVariantId').value;
+                if (!variantId) return;
+
+                const form = document.getElementById('addToCartForm');
+                // Use a proper URL pattern replacement
+                const urlTemplate = "{% url 'cart_add' 999999 %}";
+                form.action = urlTemplate.replace('999999', variantId);
+                form.submit();
+            }
+        </script>
+    </div>
+</div>
+{% endblock %}
