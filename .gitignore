@@ -6,7 +6,6 @@ __pycache__/
 .env
 db.sqlite3
 data_dump.json
-media/
 static/collected/
 venv/
 env/
