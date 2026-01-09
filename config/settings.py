@@ -31,15 +31,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-dev-only')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
-
-# Add Railway domain if it exists
-if os.getenv('RAILWAY_PUBLIC_DOMAIN'):
-    ALLOWED_HOSTS.append(os.getenv('RAILWAY_PUBLIC_DOMAIN'))
-if os.getenv('RAILWAY_TCP_PROXY_DOMAIN'):
-    ALLOWED_HOSTS.append(os.getenv('RAILWAY_TCP_PROXY_DOMAIN'))
-
-
+# settings.py
+ALLOWED_HOSTS = [
+    'pilotkidswear-production.up.railway.app', 
+    'localhost', 
+    '127.0.0.1'
+]
+# settings.py
+CSRF_TRUSTED_ORIGINS = ['https://pilotkidswear-production.up.railway.app']
 # Application definition
 
 INSTALLED_APPS = [
