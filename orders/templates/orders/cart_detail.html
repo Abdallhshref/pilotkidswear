@@ -25,7 +25,7 @@
                     </span>
                 </td>
                 <td style="padding: 1rem;">{{ item.quantity }}</td>
-                <td style="padding: 1rem;">LE {{ item.total_price }}</td>
+                <td style="padding: 1rem;">{{ item.total_price }} .LE</td>
                 <td style="padding: 1rem;">
                     <a href="{% url 'cart_remove' item.variant.id %}" style="color: #d4a3a3;">✕</a>
                 </td>
@@ -35,12 +35,13 @@
     </table>
 
     <div style="text-align: right; margin-bottom: 2rem;">
-        <h3>{% trans "Total:" %} LE {{ cart.get_total_price }}</h3>
+        <h3>{% trans "Total:" %} {{ cart.get_total_price }} .LE</h3>
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 1rem;">
         <a href="{% url 'home' %}" class="btn">{% trans "Continue Shopping" %}</a>
-        <a href="{% url 'checkout' %}" class="btn" style="background: var(--text-color); color: #fff;">{% trans "Checkout" %}</a>
+        <a href="{% url 'checkout' %}" class="btn" style="background: var(--text-color); color: #fff;">{% trans
+            "Checkout" %}</a>
     </div>
     {% else %}
     <p style="text-align: center;">{% trans "Your bag is empty." %}</p>
