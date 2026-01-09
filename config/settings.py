@@ -148,6 +148,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise configuration
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
@@ -165,7 +168,12 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_PRELOAD = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    
+    # settings.py
+    ALLOWED_HOSTS = [
+        'pilotkidswear-production.up.railway.app', 
+        'localhost', 
+        '127.0.0.1'
+    ]
     # CSRF Trusted Origins
     CSRF_TRUSTED_ORIGINS = ['https://pilotkidswear-production.up.railway.app']
 
