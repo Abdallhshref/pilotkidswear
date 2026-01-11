@@ -11,7 +11,7 @@
     <div style="margin-top: 3rem; background: #fdfdfd; padding: 2rem; border: 1px dashed #ccc; display: inline-block;">
         <h3>{% trans "Invoice Details" %}</h3>
         <p><strong>{% trans "Billed to:" %}</strong> {{ order.full_name }}</p>
-        <p><strong>{% trans "Total Amount:" %}</strong> ${{ order.get_total_price }}</p>
+        <p><strong>{% trans "Total Amount:" %}</strong> {{ order.get_total_price }}.LE</p>
         <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
             {% trans "An email has been sent to" %} {{ order.email }} {% trans "with the invoice." %}
         </p>
