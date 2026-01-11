@@ -40,8 +40,8 @@
 
     <div style="display: flex; justify-content: flex-end; gap: 1rem;">
         <a href="{% url 'home' %}" class="btn">{% trans "Continue Shopping" %}</a>
-        <a href="{% url 'checkout' %}" class="btn" style="background: var(--text-color); color: #fff;">{% trans
-            "Checkout" %}</a>
+        <a href="{% url 'checkout' %}" class="btn" style="background: var(--text-color); color: #fff;">
+            {% trans "Checkout" %}</a>
     </div>
     {% else %}
     <p style="text-align: center;">{% trans "Your bag is empty." %}</p>
