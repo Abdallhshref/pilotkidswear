@@ -76,8 +76,7 @@
                     <tr style="border-bottom: 1px solid #eee;">
                         <td style="padding: 10px;">
                             <strong>{{ item.variant.product.name }}</strong><br>
-                            <span style="font-size: 0.85rem; color: #666;">{{ item.variant.color.name }} / {{
-                                item.variant.size.name }}</span>
+                            <span style="font-size: 0.85rem; color: #666;">{{ item.variant.color.name }} / {{item.variant.size.name }}</span>
                         </td>
                         <td style="padding: 10px; text-align: center;">{{ item.quantity }}</td>
                         <td style="padding: 10px; text-align: right;">LE {{ item.price }}</td>
@@ -101,8 +100,7 @@
             <p style="margin-top: 0.5rem; display: flex; justify-content: space-between;">
                 <span>{% trans "Status:" %}</span>
                 <span class="badge"
-                    style="background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">{{
-                    order.get_status_display }}</span>
+                    style="background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">{{order.get_status_display }}</span>
             </p>
 
             <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #eee;">

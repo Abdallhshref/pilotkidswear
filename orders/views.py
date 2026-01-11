@@ -100,7 +100,9 @@ def checkout(request):
 
 def order_created(request, order_id):
     order = get_object_or_404(Order, tracking_id=order_id)
-    return render(request, 'orders/created.html', {'order': order})
+    # Calculate subtotal (sum of items) for display
+    subtotal = sum(item.get_cost() for item in order.items.all())
+    return render(request, 'orders/created.html', {'order': order, 'subtotal': subtotal})
 
 def track_order(request):
     order = None

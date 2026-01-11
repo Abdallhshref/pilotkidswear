@@ -2,20 +2,213 @@
 {% load i18n %}
 
 {% block content %}
-<div class="tracking-container" style="text-align: center; padding: 4rem;">
-    <div style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;">✓</div>
-    <h1 class="section-title">{% trans "Thank you for your order!" %}</h1>
-    <p>{% trans "Your order has been placed successfully." %}</p>
-    <p style="margin: 1rem 0;"><strong>{% trans "Order ID:" %} {{ order.tracking_id }}</strong></p>
+<style>
+    /* Invoice Styles */
+    .invoice-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: #fff;
+        padding: 3rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eee;
+    }
 
-    <div style="margin-top: 3rem; background: #fdfdfd; padding: 2rem; border: 1px dashed #ccc; display: inline-block;">
-        <h3>{% trans "Invoice Details" %}</h3>
-        <p><strong>{% trans "Billed to:" %}</strong> {{ order.full_name }}</p>
-        <p><strong>{% trans "Total Amount:" %}</strong> {{ order.get_total_price }}.LE</p>
-        <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-            {% trans "An email has been sent to" %} {{ order.email }} {% trans "with the invoice." %}
-        </p>
-        <button class="btn" style="margin-top: 1rem;" onclick="window.print()">{% trans "Print Invoice" %}</button>
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 3rem;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 2rem;
+    }
+
+    .invoice-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .invoice-meta {
+        text-align: right;
+        color: #7f8c8d;
+    }
+
+    .invoice-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .info-box h3 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        color: #95a5a6;
+        margin-bottom: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    .info-box p {
+        margin: 0.3rem 0;
+        color: #2c3e50;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+    }
+
+    .invoice-table th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #eee;
+    }
+
+    .invoice-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        color: #34495e;
+    }
+
+    .invoice-summary {
+        margin-left: auto;
+        width: 300px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        color: #7f8c8d;
+    }
+
+    .summary-row.total {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2c3e50;
+        border-top: 2px solid #2c3e50;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .print-actions {
+        margin-top: 3rem;
+        text-align: center;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        .invoice-container,
+        .invoice-container * {
+            visibility: visible;
+        }
+
+        .invoice-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 2rem;
+            box-shadow: none;
+            border: none;
+        }
+
+        .print-actions,
+        .navbar,
+        .footer {
+            display: none !important;
+        }
+    }
+</style>
+
+<div class="invoice-container">
+    <div class="invoice-header">
+        <div>
+            <h1 class="invoice-title">INVOICE</h1>
+            <p style="color: #7f8c8d; margin-top: 0.5rem;">{% trans "Thank you for your order!" %}</p>
+        </div>
+        <div class="invoice-meta">
+            <p><strong>{% trans "Order ID:" %}</strong> {{ order.tracking_id|slice:":8" }}</p>
+            <p><strong>{% trans "Date:" %}</strong> {{ order.created_at|date:"M d, Y" }}</p>
+            <p><strong>{% trans "Status:" %}</strong> {{ order.get_status_display }}</p>
+        </div>
+    </div>
+
+    <div class="invoice-grid">
+        <div class="info-box">
+            <h3>{% trans "Billed To" %}</h3>
+            <p><strong>{{ order.full_name }}</strong></p>
+            <p>{{ order.email }}</p>
+            <p>{{ order.phone_number }}</p>
+        </div>
+        <div class="info-box">
+            <h3>{% trans "Shipped To" %}</h3>
+            <p>{{ order.address }}</p>
+            <p>{{ order.city }}, {% trans "Egypt" %}</p>
+        </div>
+    </div>
+
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th>{% trans "Item" %}</th>
+                <th>{% trans "Variant" %}</th>
+                <th style="text-align: center;">{% trans "Qty" %}</th>
+                <th style="text-align: right;">{% trans "Price" %}</th>
+                <th style="text-align: right;">{% trans "Total" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.variant.product.name }}</td>
+                <td>{{ item.variant.color.name }} / {{ item.variant.size.name }}</td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">{{ item.price }} .LE</td>
+                <td style="text-align: right;">{{ item.get_cost }} .LE</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="invoice-summary">
+        <div class="summary-row">
+            <span>{% trans "Subtotal" %}</span>
+            <span>{{ subtotal }} .LE</span>
+        </div>
+        <div class="summary-row">
+            <span>{% trans "Shipping" %}</span>
+            <span>{{ order.shipping_price }} .LE</span>
+        </div>
+        {% if order.discount_amount > 0 %}
+        <div class="summary-row" style="color: #27ae60;">
+            <span>{% trans "Discount" %}</span>
+            <span>-{{ order.discount_amount }} .LE</span>
+        </div>
+        {% endif %}
+        <div class="summary-row total">
+            <span>{% trans "Total" %}</span>
+            <span>{{ order.total_price }} .LE</span>
+        </div>
+    </div>
+
+    <div class="print-actions">
+        <button class="btn" onclick="window.print()" style="padding: 0.8rem 2rem; background: #2c3e50; color: #fff;">
+            <i class="fas fa-print"></i> {% trans "Print Invoice" %}
+        </button>
+        <a href="{% url 'home' %}" class="btn"
+            style="background: transparent; color: #2c3e50; border: 1px solid #2c3e50; margin-left: 1rem;">
+            {% trans "Back to Store" %}
+        </a>
     </div>
 </div>
 {% endblock %}
