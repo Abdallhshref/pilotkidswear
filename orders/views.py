@@ -53,7 +53,7 @@ def checkout(request):
             if city in ['Cairo', 'Giza']:
                 shipping_price = Decimal('50')
             else:
-                shipping_price = Decimal('75')
+                shipping_price = Decimal('90')
         
         # 2. Discount Logic
         items_total = cart.get_total_price()
